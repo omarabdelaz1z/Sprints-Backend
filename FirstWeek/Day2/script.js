@@ -123,7 +123,7 @@ const isValidName = (name) =>
 
   while (password !== "123") {
     exceptionCounter++;
-    if (exceptionCounter > 3) {
+    if (exceptionCounter > 2) {
       alert("Program Ends.");
       return;
     }

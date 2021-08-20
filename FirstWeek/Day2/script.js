@@ -65,7 +65,12 @@ const DAYS_IN_MONTH = {
   12: 31,
 };
 
-// Find a zodiac sign that whose start <= (month, day) and end >= (month, day)
+/**
+ * Find a zodiac sign that whose start <= (month, day) and end >= (month, day)
+ * @param month
+ * @param day
+ * @returns zodiac object
+ */
 const getZodiacSign = (month, day) => {
   const currentTime = new Date(0, month - 1, day).getTime();
 
@@ -79,14 +84,30 @@ const getZodiacSign = (month, day) => {
   }
 };
 
+/**
+ * Check if month is between [1, 12]
+ * @param month
+ * @returns Boolean
+ */
 const isMonthValid = (month) => {
   return month >= 1 && month <= 12;
 };
 
+/**
+ * Check if the a day conform to DAYS_IN_MONTH object according to month.
+ * @param month
+ * @param day
+ * @returns Boolean
+ */
 const isDayInMonth = (month, day) => {
   return day <= DAYS_IN_MONTH[month];
 };
 
+/**
+ * Check if the name's length is >= 3 and have only characters.
+ * @param name
+ * @returns Boolean
+ */
 const isValidName = (name) =>
   name.length >= 3 && /^[a-zA-Z ]+$/.test(name.trim());
 

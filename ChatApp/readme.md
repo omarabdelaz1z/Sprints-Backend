@@ -5,7 +5,8 @@
 
 > Instructions
 >
-> - git clone
+> - git clone repo
+> - cd .\Sprints-Backend-Tasks\ChatApp\
 > - npm install
 > - node app.js
 

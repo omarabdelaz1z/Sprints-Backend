@@ -1,3 +1,4 @@
+"use strict";
 require("dotenv").config();
 const express = require("express");
 const Pusher = require("pusher");
@@ -10,7 +11,7 @@ const app = express();
 
 app.use(express.static("public"));
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 
 const pusher = new Pusher({
   appId: process.env.APP_ID,
@@ -30,50 +31,46 @@ app.post("/message", async (req, res) => {
     timeStyle: "short",
     dateStyle: "medium",
   });
-  
-  try{
+
+  try {
     await pusher.trigger(group, "message", {
       ...req.body,
       receivedDate,
     });
-  
+
     // Once a message sent, return subscription count as response.
-    res.send();
-  }catch(error){
-    console.error(error)
+    res.status(200).send();
+  } catch (error) {
+    res.status(503).send({ errorMessage: error });
   }
 });
 
 app.post("/login", async (req, res) => {
   const { group, username } = req.body;
-  
+
   const userId = generateID();
   const user = { userId, username, group };
 
   // Check if the channel exists:
   // Add the group and assign the user to list of users of that group.
   // Otherwise, the channel exists and the user is added to the list.
-  try{
-    if (!channels[group]) 
-      channels[group] = [user];
-    
-    else
-      channels[group].push(user);
+  try {
+    if (!channels[group]) channels[group] = [user];
+    else channels[group].push(user);
 
-    res.send(user);
-  }
-  catch(error) {
-    res.redirect('/');
+    res.status(200).send(user);
+  } catch (error) {
+    res.status(401).redirect("/");
   }
 });
 
 app.post("/logout", async (req, res) => {
   const { userId, group } = req.body;
-  try{
+  try {
     channels[group] = channels[group].filter((user) => user.userId !== userId);
     res.status(200).end();
-  }catch(error){
-    console.error(error); 
+  } catch (error) {
+    res.status(404).send({ errorMessage: "Group not found" });
   }
 });
 
@@ -81,7 +78,7 @@ app.get("/usercount/:group/", (req, res) => {
   const { group } = req.params;
   const channel = channels?.[group];
 
-  if (!channel) res.status(404).json({ message: "Not Found" });
+  if (!channel) res.status(404).json({ message: "Group not found" });
   else res.status(200).json({ group, count: channel.length });
 });
 

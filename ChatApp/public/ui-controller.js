@@ -1,3 +1,4 @@
+"use strict";
 import { bind } from "./pusher.js";
 import {
   isContentEmpty,
@@ -26,8 +27,7 @@ const sendMessageButton = document.getElementById("send-btn");
 const messageComponent = document.getElementById("message-area");
 const timerComponent = document.getElementById("countdown-timer");
 
-const handleMessageBox = async (event) => 
-{
+const handleMessageBox = async (event) => {
   if (event.altKey || event.ctrlKey || event.key === "Enter")
     event.preventDefault();
 
@@ -36,34 +36,31 @@ const handleMessageBox = async (event) =>
   // Empty messages are not allowed.
   if (isContentEmpty(content)) return;
 
-  if (event.type === "click" || isSend(event)) 
-  {
-    console.log(content)
+  if (event.type === "click" || isSend(event)) {
+    console.log(content);
     const data = JSON.parse(localStorage.getItem("data"));
-    const body = JSON.stringify({...data, content});
+    const body = JSON.stringify({ ...data, content });
 
     console.log(body);
 
-    try{
-      await fetch("/message", {
+    try {
+      const response = await fetch("/message", {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
         method: "POST",
-        body
-      }); 
-    }
+        body,
+      });
 
-    catch(error){
-      console.error(error);
-    }finally{
+      if (response.status === 503) throw new Error("Server unavailable");
+    } catch (error) {
+      window.location.reload();
+    } finally {
       messageComponent.value = "";
       timer = reset(minutes); // reset timer.
     }
-  }
-
-  else if (isNewLine(event)) {
+  } else if (isNewLine(event)) {
     messageComponent.value += "\r\n";
   }
 };
@@ -72,16 +69,18 @@ const updateOnlineUsersCount = async () => {
   const { group } = JSON.parse(localStorage.getItem("data"));
   let count = 0;
 
-  try{
-    const res = await getOnlineUsersCount(group);
-    count = res?.count;
-  }
-  catch(error){
-    console.log(error);
-  }finally{
+  try {
+    const response = await getOnlineUsersCount(group);
+    if (response.status === 404) throw new Error(error.message);
+
+    count = response?.count;
+
     onlineUsers.textContent = `${count} users online now`;
+  } catch (error) {
+    console.log(error.message);
+    window.location.reload();
   }
-}
+};
 
 const joinGroupHandler = async () => {
   const username = usernameInput.value;
@@ -92,17 +91,19 @@ const joinGroupHandler = async () => {
   const userData = { username, group };
   const body = JSON.stringify(userData);
 
-  try{
-    const res = await fetch("/login", {
+  try {
+    const response = await fetch("/login", {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body
+      body,
     });
 
-    const { userId } = await res.json();
+    if (response.status === "401") throw new Error("Failed to login");
+
+    const { userId } = await response.json();
 
     userData.userId = userId;
     localStorage.setItem("data", JSON.stringify(userData));
@@ -111,17 +112,15 @@ const joinGroupHandler = async () => {
 
     pageTitle.innerHTML = `Chat with Group ${group}`;
     groupHeader.innerHTML = `Group Name: ${group}`;
-    
+
     screenOne.style.display = "none";
     screenTwo.style.display = "block";
-    
+
     setInterval(updateOnlineUsersCount, 5000);
     setInterval(countDown, 1000);
-
-  }catch(error){
-    console.error(error);
+  } catch (error) {
+    console.error(error.message);
   }
-
 };
 
 const exitChat = async () => {
@@ -130,20 +129,25 @@ const exitChat = async () => {
   const body = JSON.stringify({ userId, group });
 
   try {
-    await fetch("/logout", {
+    const response = await fetch("/logout", {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
       method: "POST",
-      body
+      body,
     });
 
-    localStorage.removeItem("data");
+    if (response.status === 404) {
+      const message = await response.json().errorMessage; 
+      throw new Error(message);
+    }
 
-    window.location.reload();
+    localStorage.removeItem("data");
   } catch (err) {
     console.error(err);
+  } finally {
+    window.location.reload();
   }
 };
 

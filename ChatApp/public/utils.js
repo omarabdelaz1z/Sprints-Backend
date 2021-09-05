@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Check if entered button is enter only.
  * @param Event: destructured into altKey, ctrlKey, shiftKey and key

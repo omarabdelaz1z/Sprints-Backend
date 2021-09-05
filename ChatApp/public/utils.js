@@ -81,7 +81,7 @@ const renderMessage = ({ username, userId, content, receivedDate }) => {
  * @param String group
  * @returns {'group': , 'count': }
  */
-const getUserCount = async (group) => {
+const getOnlineUsersCount = async (group) => {
   try {
     const res = await fetch(`/usercount/${group}`, {
       method: "GET",
@@ -90,10 +90,9 @@ const getUserCount = async (group) => {
       },
     });
 
-    const json = await res.json();
-    return json;
+    return await res.json();
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 
@@ -104,5 +103,5 @@ export {
   formatTime,
   reset,
   renderMessage,
-  getUserCount,
+  getOnlineUsersCount,
 };

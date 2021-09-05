@@ -5,7 +5,7 @@ import {
   isSend,
   formatTime,
   reset,
-  getUserCount,
+  getOnlineUsersCount,
 } from "./utils.js";
 
 const minutes = 1;
@@ -26,49 +26,62 @@ const sendMessageButton = document.getElementById("send-btn");
 const messageComponent = document.getElementById("message-area");
 const timerComponent = document.getElementById("countdown-timer");
 
-const handleMessageBox = async (event) => {
-  if (event.shiftKey || event.altKey || event.ctrlKey || event.key === "Enter")
+const handleMessageBox = async (event) => 
+{
+  if (event.altKey || event.ctrlKey || event.key === "Enter")
     event.preventDefault();
 
   const content = messageComponent.value;
 
-  if (isContentEmpty(content)) {
-    // console.log("Empty messages are not allowed.");
-    return;
-  }
+  // Empty messages are not allowed.
+  if (isContentEmpty(content)) return;
 
-  if (event.type === "click" || isSend(event)) {
-    // console.log(`Message sent: ${content}`);
-
+  if (event.type === "click" || isSend(event)) 
+  {
+    console.log(content)
     const data = JSON.parse(localStorage.getItem("data"));
-    await fetch("/message", {
-      body: JSON.stringify({
-        ...data,
-        content,
-      }),
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
+    const body = JSON.stringify({...data, content});
 
-    const res = await getUserCount(data.group);
-    // console.log(res);
-    const groupCount = res?.count || 0;
+    console.log(body);
 
-    onlineUsers.textContent = `${groupCount} users online now`;
+    try{
+      await fetch("/message", {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body
+      }); 
+    }
 
-    messageComponent.value = "";
-    timer = reset(minutes); // reset timer.
-    return;
+    catch(error){
+      console.error(error);
+    }finally{
+      messageComponent.value = "";
+      timer = reset(minutes); // reset timer.
+    }
   }
 
-  if (isNewLine(event)) {
-    // console.log("Alt + Enter Pressed");
+  else if (isNewLine(event)) {
     messageComponent.value += "\r\n";
   }
 };
+
+const updateOnlineUsersCount = async () => {
+  const { group } = JSON.parse(localStorage.getItem("data"));
+  let count = 0;
+
+  try{
+    const res = await getOnlineUsersCount(group);
+    count = res?.count;
+  }
+  catch(error){
+    console.log(error);
+  }finally{
+    onlineUsers.textContent = `${count} users online now`;
+  }
+}
 
 const joinGroupHandler = async () => {
   const username = usernameInput.value;
@@ -76,54 +89,54 @@ const joinGroupHandler = async () => {
 
   if (isContentEmpty(group) || isContentEmpty(username)) return;
 
-  const res = await fetch("/login", {
-    body: JSON.stringify({
-      username,
-      group,
-    }),
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-  });
+  const userData = { username, group };
+  const body = JSON.stringify(userData);
 
-  const { userId } = await res.json();
+  try{
+    const res = await fetch("/login", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body
+    });
 
-  localStorage.setItem(
-    "data",
-    JSON.stringify({
-      username,
-      userId,
-      group,
-    })
-  );
+    const { userId } = await res.json();
 
-  pageTitle.innerHTML = `Chat with Group ${group}`;
-  groupHeader.innerHTML = `Group Name: ${group}`;
+    userData.userId = userId;
+    localStorage.setItem("data", JSON.stringify(userData));
 
-  screenOne.style.display = "none";
-  screenTwo.style.display = "block";
+    bind(group); // register group with the service.
 
-  bind(group); // register group with the service.
+    pageTitle.innerHTML = `Chat with Group ${group}`;
+    groupHeader.innerHTML = `Group Name: ${group}`;
+    
+    screenOne.style.display = "none";
+    screenTwo.style.display = "block";
+    
+    setInterval(updateOnlineUsersCount, 5000);
+    setInterval(countDown, 1000);
 
-  setInterval(countDown, 1000);
+  }catch(error){
+    console.error(error);
+  }
+
 };
 
 const exitChat = async () => {
   // console.log(localStorage.getItem("data"));
   const { userId, group } = JSON.parse(localStorage.getItem("data"));
+  const body = JSON.stringify({ userId, group });
+
   try {
     await fetch("/logout", {
-      body: JSON.stringify({
-        userId,
-        group,
-      }),
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
       method: "POST",
+      body
     });
 
     localStorage.removeItem("data");
@@ -139,11 +152,7 @@ const countDown = () => {
   timerComponent.innerHTML = `You will be logout after (${formattedTime})`;
   timer--;
 
-  if (timer < 0) {
-    // console.log("It will reset the timer for now.");
-    // timer = reset(minutes);
-    exitChat();
-  }
+  if (timer < 0) exitChat();
 };
 
 sendMessageButton.addEventListener("click", handleMessageBox);

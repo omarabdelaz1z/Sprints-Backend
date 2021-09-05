@@ -1,3 +1,4 @@
+"use strict";
 import { bind } from "./pusher.js";
 import {
   isContentEmpty,
@@ -5,7 +6,7 @@ import {
   isSend,
   formatTime,
   reset,
-  getUserCount,
+  getOnlineUsersCount,
 } from "./utils.js";
 
 const minutes = 1;
@@ -27,46 +28,57 @@ const messageComponent = document.getElementById("message-area");
 const timerComponent = document.getElementById("countdown-timer");
 
 const handleMessageBox = async (event) => {
-  if (event.shiftKey || event.altKey || event.ctrlKey || event.key === "Enter")
+  if (event.altKey || event.ctrlKey || event.key === "Enter")
     event.preventDefault();
 
   const content = messageComponent.value;
 
-  if (isContentEmpty(content)) {
-    // console.log("Empty messages are not allowed.");
-    return;
-  }
+  // Empty messages are not allowed.
+  if (isContentEmpty(content)) return;
 
   if (event.type === "click" || isSend(event)) {
-    // console.log(`Message sent: ${content}`);
-
+    console.log(content);
     const data = JSON.parse(localStorage.getItem("data"));
-    await fetch("/message", {
-      body: JSON.stringify({
-        ...data,
-        content,
-      }),
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
+    const body = JSON.stringify({ ...data, content });
 
-    const res = await getUserCount(data.group);
-    // console.log(res);
-    const groupCount = res?.count || 0;
+    console.log(body);
 
-    onlineUsers.textContent = `${groupCount} users online now`;
+    try {
+      const response = await fetch("/message", {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body,
+      });
 
-    messageComponent.value = "";
-    timer = reset(minutes); // reset timer.
-    return;
-  }
-
-  if (isNewLine(event)) {
-    // console.log("Alt + Enter Pressed");
+      if (response.status === 503) throw new Error("Server unavailable");
+    } catch (error) {
+      window.location.reload();
+    } finally {
+      messageComponent.value = "";
+      timer = reset(minutes); // reset timer.
+    }
+  } else if (isNewLine(event)) {
     messageComponent.value += "\r\n";
+  }
+};
+
+const updateOnlineUsersCount = async () => {
+  const { group } = JSON.parse(localStorage.getItem("data"));
+  let count = 0;
+
+  try {
+    const response = await getOnlineUsersCount(group);
+    if (response.status === 404) throw new Error(error.message);
+
+    count = response?.count;
+
+    onlineUsers.textContent = `${count} users online now`;
+  } catch (error) {
+    console.log(error.message);
+    window.location.reload();
   }
 };
 
@@ -76,61 +88,66 @@ const joinGroupHandler = async () => {
 
   if (isContentEmpty(group) || isContentEmpty(username)) return;
 
-  const res = await fetch("/login", {
-    body: JSON.stringify({
-      username,
-      group,
-    }),
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-  });
+  const userData = { username, group };
+  const body = JSON.stringify(userData);
 
-  const { userId } = await res.json();
+  try {
+    const response = await fetch("/login", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body,
+    });
 
-  localStorage.setItem(
-    "data",
-    JSON.stringify({
-      username,
-      userId,
-      group,
-    })
-  );
+    if (response.status === "401") throw new Error("Failed to login");
 
-  pageTitle.innerHTML = `Chat with Group ${group}`;
-  groupHeader.innerHTML = `Group Name: ${group}`;
+    const { userId } = await response.json();
 
-  screenOne.style.display = "none";
-  screenTwo.style.display = "block";
+    userData.userId = userId;
+    localStorage.setItem("data", JSON.stringify(userData));
 
-  bind(group); // register group with the service.
+    bind(group); // register group with the service.
 
-  setInterval(countDown, 1000);
+    pageTitle.innerHTML = `Chat with Group ${group}`;
+    groupHeader.innerHTML = `Group Name: ${group}`;
+
+    screenOne.style.display = "none";
+    screenTwo.style.display = "block";
+
+    setInterval(updateOnlineUsersCount, 5000);
+    setInterval(countDown, 1000);
+  } catch (error) {
+    console.error(error.message);
+  }
 };
 
 const exitChat = async () => {
   // console.log(localStorage.getItem("data"));
   const { userId, group } = JSON.parse(localStorage.getItem("data"));
+  const body = JSON.stringify({ userId, group });
+
   try {
-    await fetch("/logout", {
-      body: JSON.stringify({
-        userId,
-        group,
-      }),
+    const response = await fetch("/logout", {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
       method: "POST",
+      body,
     });
 
-    localStorage.removeItem("data");
+    if (response.status === 404) {
+      const message = await response.json().errorMessage; 
+      throw new Error(message);
+    }
 
-    window.location.reload();
+    localStorage.removeItem("data");
   } catch (err) {
     console.error(err);
+  } finally {
+    window.location.reload();
   }
 };
 
@@ -139,11 +156,7 @@ const countDown = () => {
   timerComponent.innerHTML = `You will be logout after (${formattedTime})`;
   timer--;
 
-  if (timer < 0) {
-    // console.log("It will reset the timer for now.");
-    // timer = reset(minutes);
-    exitChat();
-  }
+  if (timer < 0) exitChat();
 };
 
 sendMessageButton.addEventListener("click", handleMessageBox);

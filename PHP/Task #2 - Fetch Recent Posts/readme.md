@@ -20,7 +20,7 @@ Top-Level Directory Structure :deciduous_tree:
 
 
 
-> I needed to populate the some data in the database to make sure the functionality works properly.
+> I needed to populate some dummy data in the database to make sure data are displayed properly.
 
 <img src="database-population.gif"> 
 

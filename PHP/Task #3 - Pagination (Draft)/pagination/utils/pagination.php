@@ -5,18 +5,19 @@ define('PAGE_THRESHOLD', 2); // Number of Pages to display
 // From Page .... UntilPage: To be displayed on page
 function getNavigationBoundaries($page, $pageCount){
     $fromPage = $page === 1 ? 1 : $page - 1;
-    $untilPage = $fromPage + PAGE_THRESHOLD - 1;
+    $untilPage = $fromPage + PAGE_THRESHOLD;
 
     if($untilPage > $pageCount) {
         $untilPage = $pageCount;
-        $fromPage =  $untilPage - PAGE_THRESHOLD - 1;
+        $adjust = $untilPage - PAGE_THRESHOLD;
+        $fromPage =  $adjust <= 0 ? 1 : $adjust;
     }
 
     return ["fromPage" => $fromPage, "untilPage" => $untilPage];
 }
 
 function getPageCount($dataCount, $dataPerPage){
-    return CEIl($dataCount / $dataPerPage);
+    return intval(CEIl($dataCount / $dataPerPage));
 }
 
 function getPaginationInfo($dataCount, $dataPerPage, $currentPage) {

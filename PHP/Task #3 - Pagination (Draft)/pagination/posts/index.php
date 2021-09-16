@@ -18,7 +18,7 @@ try{
     mysqli_close($connection);
 
     // echo json_encode($posts, JSON_PRETTY_PRINT).'<br><br>';
-    // echo '{ "Pagination":' . json_encode($paginationInfo, JSON_PRETTY_PRINT).'<br><br>';
+    // echo json_encode($paginationInfo, JSON_PRETTY_PRINT).'<br><br>';
     
 }catch(mysqli_sql_exception $e){
     echo 'Failure: '.$e->getMessage().'<br><br>';

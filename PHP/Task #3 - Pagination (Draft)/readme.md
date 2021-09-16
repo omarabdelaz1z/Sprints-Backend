@@ -1,6 +1,6 @@
 ## Task #3 - Pagination
 
-> I inserted many dummy rows to check whether the functionality works or not.
+
 
 #### 1.0.2
 - Bug Fix: Negative Pagination in UI
@@ -15,4 +15,4 @@
 - Post Controller
 - SQL Injection
 - ```index.php``` without styling.
-- [Check this out to learn more](https://www.youtube.com/watch?v=b2fKbI0GGkk)
+> I inserted many dummy rows to check whether the functionality works or not. [Check this out to learn more](https://www.youtube.com/watch?v=b2fKbI0GGkk)

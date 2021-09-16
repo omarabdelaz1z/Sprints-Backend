@@ -1,15 +1,15 @@
 <?php
 
-define('PAGE_THRESHOLD', 5);
+define('PAGE_THRESHOLD', 2); // Number of Pages to display
 
 // From Page .... UntilPage: To be displayed on page
 function getNavigationBoundaries($page, $pageCount){
     $fromPage = $page === 1 ? 1 : $page - 1;
-    $untilPage = $fromPage + PAGE_THRESHOLD;
+    $untilPage = $fromPage + PAGE_THRESHOLD - 1;
 
     if($untilPage > $pageCount) {
         $untilPage = $pageCount;
-        $fromPage = $untilPage - PAGE_THRESHOLD;
+        $fromPage =  $untilPage - PAGE_THRESHOLD - 1;
     }
 
     return ["fromPage" => $fromPage, "untilPage" => $untilPage];
@@ -30,20 +30,3 @@ function getPaginationInfo($dataCount, $dataPerPage, $currentPage) {
             "dataCount" => $dataCount
     ];
 }
-
-// SELECT COUNT(1) AS COUNT FROM posts;
-// SELECT * FROM posts ORDER BY publish_date DESC LIMIT $1, $2 
-
-/**
- * Response = {
- *  data => posts[],
- *  pagination => 
- *          [
- *               dataCount,
- *               totalPages,
- *               fromPage, 
- *               untilPage, 
- *               currentPage
- *          ] 
- * } 
- */

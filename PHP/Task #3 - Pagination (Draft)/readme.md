@@ -2,14 +2,14 @@
 
 > I inserted many dummy rows to check whether the functionality works or not.
 
-#### Version V1.0.2
+#### 1.0.2
 - Bug Fix: Negative Pagination in UI
 
-#### Version V1.0.1
+#### 1.0.1
 - UI and Pagination Styling
 - switched to the main database
 
-#### Version V1.0.0: 
+#### 1.0.0: 
 - Database Connection Logic
 - Pagination Logic
 - Post Controller

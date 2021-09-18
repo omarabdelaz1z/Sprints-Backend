@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap" rel="stylesheet"> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/7.0.3/pusher.min.js"></script>
+    <title>Pick Group</title>
+  </head>
+  <body>
+    <div id="screen-one" class="join-group" style="display: block;">
+      <form action="#" method="POST" class="join-group-form">
+        <h1>Sprints Chat App</h1>
+        <div class="group-element">
+          <label for="group-name">Group name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="group-name"
+            placeholder="Type group name"
+            value="a"
+            required
+          />
+        </div>
+        <div class="group-element">
+          <label for="username">User name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            placeholder="Type your name"
+            value="b"
+            required
+          />
+        </div>
+        <div class="group-element">
+          <button id="join-button" type="button">
+            Join Group
+          </button>
+        </div>
+    </form>
+  </div>
+
+    <div id="screen-two" class="chat-card" style="display: none;">
+      <div id="chat-header" class="container" style="display: inline-block">
+        <h1 id="group-header">Group Name</h1>
+        <p  id="online-users">0 users online now</p>
+        <button id="logout" style="float: right;">Log out</button>
+      </div>
+      <div class="chat-body container" style="overflow-y: scroll;">
+            <ul id="chat-log">
+              
+            </ul>
+      </div>
+      <div class="send-message container">
+        <div>
+          <textarea
+            id="message-area"
+            rows="3"
+            placeholder="Message..."
+          ></textarea>
+        </div>
+        <div>
+          <button id="send-btn" type="button">Send Message</button>
+        </div>
+      </div>
+        <p id="countdown-timer" style="text-align: center;">You will be logout after (01:00)</p>
+    </div>
+    <script type="module" src="ui-controller.js"></script>
+  </body>
+</html>

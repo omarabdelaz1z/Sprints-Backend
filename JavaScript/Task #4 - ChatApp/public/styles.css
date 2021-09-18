@@ -1,0 +1,145 @@
+* {
+  font-family: "Poppins", sans-serif;
+}
+
+/* For First Screen */
+.join-group {
+  border: 1px solid black;
+  margin: 12% auto 0 auto;
+  width: 45%;
+  padding: 10px;
+  height: 400px;
+}
+
+.join-group-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+}
+
+.join-group-form > h1 {
+  font-size: 2.2rem;
+  font-weight: 400;
+}
+
+.group-element {
+  margin: 15px;
+}
+
+.group-element > label {
+  font-size: 1.1rem;
+  font-weight: 300;
+  margin-right: 10px;
+}
+
+.form-control {
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+#join-button {
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 10px;
+  background-color: transparent;
+  width: 100%;
+  cursor: pointer;
+}
+
+/* For Second Screen */
+.container {
+  margin: 0 auto 10px auto;
+}
+
+#chat-header {
+  width: 100%;
+}
+
+#chat-header > h1 {
+  font-weight: 200;
+  margin: 0;
+}
+
+.chat-card {
+  border: 1px solid black;
+  margin: 100px auto;
+  max-width: 65%;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+#logout {
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: transparent;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.chat-body {
+  border: 1px solid black;
+  width: 100%;
+  height: 300px;
+}
+
+ul {
+  padding: 25px;
+}
+
+li {
+  list-style: none;
+}
+
+.message-self {
+  text-align: left;
+  border: 0.5px solid black;
+  border-radius: 10px;
+  clear: both;
+  float: right;
+  width: 35%;
+  height: 45px;
+  word-break: break-all;
+  margin: 5px;
+  padding: 10px;
+}
+
+.message-others {
+  text-align: left;
+  border: 0.5px solid black;
+  border-radius: 10px;
+  width: 35%;
+  height: 45px;
+  word-break: break-all;
+  clear: both;
+  float: left;
+  margin: 5px;
+  padding: 10px;
+}
+
+.send-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+#send-btn {
+  padding: 24.5px;
+  background-color: transparent;
+  border: 1px solid black;
+  border-radius: 5px;
+  margin-left: 15px;
+}
+
+#message-area {
+  width: 40rem;
+  height: 55px;
+  resize: none;
+  padding: 5px;
+  border: 1px solid black;
+  border-radius: 5px;
+}
